@@ -1,0 +1,11 @@
+from clip_encoder import load_clip_encoder
+from text2image import load_sd_model
+import torch
+
+encoder = load_clip_encoder()
+sd_model = load_sd_model("huggingface_hub.utils._validators.HFValidationError: Repo id must use alphanumeric chars or '-', '_', '.', '--' and '..' are forbidden, '-' and '.' cannot start or end the name, max length is 96: './stable-diffusion-v1-4'.")
+
+prompt = "a photo of an astronaut riding a horse on mars"
+image = sd_model(prompt).images
+
+print(image)
