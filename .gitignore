@@ -1,5 +1,5 @@
 models/*
-data/*
+data/cirr/img_raw/*
 .env
 __pycache__/*
 clip-vit-large-patch14/*
