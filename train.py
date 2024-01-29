@@ -47,7 +47,7 @@ def parse_args():
     parser.add_argument('--batch_size', type=int, default=64) 
     parser.add_argument('--num_epochs', type=int, default=10)
     parser.add_argument('--steps', type=int, default=20)
-    parser.add_argument('--device', type=str, default="cuda:7")
+    parser.add_argument('--device', type=str, default="cuda:0")
     args = parser.parse_args()
     return args
 
@@ -61,16 +61,19 @@ if __name__ == '__main__':
     ## Initiating tokenizer and encoder.
     tokenizer = CLIPTokenizer.from_pretrained("clip-vit-large-patch14")
     text_encoder = CLIPTextModel.from_pretrained("clip-vit-large-patch14").to(device)
+    print("Text encoder and tokenzier loaded")
     
     ## Initiating the VAE
     vae = AutoencoderKL.from_pretrained("stable-diffusion-v1-4", subfolder="vae").to(device)
-    
+    print("VAE loaded")
+
     ## Initializing a scheduler and Setting number of sampling steps
     scheduler = LMSDiscreteScheduler(beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear", num_train_timesteps=1000)
     scheduler.set_timesteps(50)
     
     ## Initializing the U-Net model
     unet = UNet2DConditionModel.from_pretrained("stable-diffusion-v1-4", subfolder="unet").to(device)
+    print("UNet loaded")
     
     # CLIPImage Processor
     processor = CLIPProcessor.from_pretrained("clip-vit-large-patch14")
