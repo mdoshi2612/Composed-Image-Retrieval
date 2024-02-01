@@ -1,4 +1,7 @@
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import numpy as np
 
 class LossFunction(torch.nn.Module):
   def __init__(self, margin, device):
@@ -9,4 +12,4 @@ class LossFunction(torch.nn.Module):
 
   def forward(self, embedding_1, embedding_2):
     batch_size = embedding_1.size()[0]
-    return torch.mean(self.cosineLoss(embedding_1, embedding_2, torch.ones(batch_size).to(self.device)))
+    return torch.mean(self.cosineLoss(embedding_1, embedding_2, torch.ones(batch_size).to(self.device)))  

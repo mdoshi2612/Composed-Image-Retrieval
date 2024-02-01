@@ -123,10 +123,10 @@ if __name__ == '__main__':
     
             # Get image embedding
             target_embedding = pipeline(source_data, caption_data, steps = args.steps).requires_grad_().reshape(-1, 768)
-            # print(target_embedding.size(), target_data.size())
+            print(target_embedding.size(), target_data.size())
           
             # Get loss and do one optimization step
-            loss = criterion(target_embedding, target_data)
+            loss = pipeline.compute_loss(target_embedding, target_data)
             loss.backward()
             optimizer.step()
             train_loss += loss.item()

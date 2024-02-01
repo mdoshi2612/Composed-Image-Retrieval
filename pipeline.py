@@ -14,6 +14,7 @@ import torch.utils.data
 import torchvision
 from torchvision import transforms as tfms
 import torch, logging
+import torch.nn.functional as F
 import torch.nn as nn
 
 import matplotlib.pyplot as plt
@@ -45,6 +46,7 @@ class CIRPipeline(torch.nn.Module):
         self.unet = unet.to(device)
         self.processor = processor
         self.image_encoder = image_encoder.to(device)
+        self.temperature = 1.0
         
         # Freeze all other models        
         for param in self.text_encoder.parameters():
@@ -177,7 +179,29 @@ class CIRPipeline(torch.nn.Module):
         image = self.latents_to_pil(latents)
         if return_image:
           return image
-        return self.image_enc(image)
+        image_embedding = self.image_enc(image)
+        return image_embedding
+    
+    def cross_entropy(preds, targets, reduction='none'):
+        log_softmax = nn.LogSoftmax(dim=-1)
+        loss = (-targets * log_softmax(preds)).sum(1)
+        if reduction == "none":
+            return loss
+        elif reduction == "mean":
+            return loss.mean()
+
+    def compute_loss(self, pred, label):
+        logits = (pred @ label.T) / self.temperature
+        pred_similarity = label @ label.T
+        label_similarity = pred @ pred.T
+        targets = F.softmax(
+            (pred_similarity + label_similarity) / 2 * self.temperature, dim=-1
+        )
+        pred_loss = self.cross_entropy(logits, targets, reduction='none')
+        label_loss = self.cross_entropy(logits.T, targets.T, reduction='none')
+        loss =  (pred_loss + label_loss) / 2.0 # shape: (batch_size)
+        return loss.mean()
+
 
     def combine_inputs(self, bs, image_embedding, prompt_embedding):
         # Get batch size            
